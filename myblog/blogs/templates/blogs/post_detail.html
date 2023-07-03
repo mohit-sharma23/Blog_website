@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load markdown_extras %}
+
+{% block title %}{{ post.title }}{% endblock title %}
+
+{% block content %}
+<div class="g-5 pt-4">
+  
+  <div class="container col-md-8">
+    <h1 class="blog-post-title">{{ post.title }}</h1>
+    <p class="blog-post-meta">
+      {{ post.publish|date:'M j, o' }} by
+      <a class="text-decoration-none text-secondary" href="#">{{ post.author }}</a>
+    </p>
+    {{ post.body|markdown|safe }}
+    {% if request.user == post.author %}
+      <a class="btn btn-success" href="{% url 'blogs:post_update' post.slug %}">
+        Update
+      </a>
+      <a class="btn btn-danger" href="{% url 'blogs:post_delete' post.slug %}">
+        Delete
+      </a>
+    {% endif %}
+    <hr>
+    <div class="my-4">
+      {% with comments.count as total_comments %}
+      <h4>{{ total_comments }} Comment{{ total_comments|pluralize }}</h4>
+      {% endwith %}
+      {% for comment in comments %}
+      <p><b>{{ comment.author.username }}</b> - {{ comment.created|timesince }} ago</p>
+      {{ comment.comment|linebreaks  }}
+      {% empty %}
+      <p>There are no comments.</p>
+      {% endfor %}
+    </div>
+    <hr>
+  </div>
+  
+  {% if request.user.is_authenticated %}
+    {% include 'blogs/comment_form.html' %}
+  {% endif %}
+  
+</div>
+{% endblock content %}
